@@ -1,18 +1,23 @@
 package me.brucezz.crawler.thread;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import me.brucezz.crawler.bean.Danmaku;
 import me.brucezz.crawler.bean.Request;
 import me.brucezz.crawler.bean.ServerInfo;
 import me.brucezz.crawler.db.DanmakuDao;
 import me.brucezz.crawler.handler.MessageHandler;
 import me.brucezz.crawler.handler.ResponseParser;
-import me.brucezz.crawler.util.*;
-
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import me.brucezz.crawler.util.HttpUtil;
+import me.brucezz.crawler.util.LogUtil;
+import me.brucezz.crawler.util.MD5Util;
+import me.brucezz.crawler.util.SttCode;
+import me.brucezz.crawler.util.TimeHelper;
 
 /**
  * Created by Brucezz on 2016/01/04.
@@ -63,7 +68,7 @@ public class CrawlerThread implements Runnable {
             return finish;
         }
     };
-
+    private FileWriter fWriter;
     //请求弹幕服务器回调
     private MessageHandler.OnReceiveListener danmakuListener = new MessageHandler.OnReceiveListener() {
 
@@ -71,9 +76,14 @@ public class CrawlerThread implements Runnable {
         private List<Danmaku> danmakus = new ArrayList<>();
         private TimeHelper helper = new TimeHelper(20 * 60 * 1000);//间隔20min检测一次直播状态
 
+
         @Override
         public void onReceive(List<String> responses) {
-
+            try {
+                fWriter = new FileWriter("danmu.txt", true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             for (String response : responses) {
                 LogUtil.d("Receive Response", response);
 
@@ -84,8 +94,15 @@ public class CrawlerThread implements Runnable {
                 if (danmaku == null) continue;
 
                 danmakus.add(danmaku);
-                LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
 
+                LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
+                try {
+                    fWriter.write(danmaku.getSnick() + ":" + danmaku.getContent() + "\n");
+                    fWriter.flush();
+                } catch (IOException e) {
+                    e.printStackTrace();
+
+                }
                 if (danmakus.size() >= 20 && DanmakuDao.saveDanmaku(danmakus)) {
                     LogUtil.i("DB", "保存弹幕到数据库 ...");
                     danmakus.clear();
