@@ -95,16 +95,16 @@ public class CrawlerThread implements Runnable {
 
                 danmakus.add(danmaku);
 
-                LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
+                //LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
                 try {
-                    fWriter.write(danmaku.getSnick() + ":" + danmaku.getContent() + "\n");
+                    fWriter.write(danmaku.getRid()+","+danmaku.getUid()+","+danmaku.getSnick() + ":" + danmaku.getContent() + "\n");
                     fWriter.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
 
                 }
-                if (danmakus.size() >= 20 && DanmakuDao.saveDanmaku(danmakus)) {
-                    LogUtil.i("DB", "保存弹幕到数据库 ...");
+                if (DanmakuDao.saveDanmaku(danmakus)) {
+                    //LogUtil.i("DB", "保存弹幕到数据库 ...");
                     danmakus.clear();
                 }
             }

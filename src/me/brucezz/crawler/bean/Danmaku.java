@@ -14,6 +14,8 @@ public class Danmaku {
     private Date date;//发布时间
     private int rid;//房间号
 
+    public Danmaku() {}
+    
     public Danmaku(int uid, String snick, String content, int rid) {
         this.uid = uid;
         this.snick = snick;
