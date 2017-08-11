@@ -70,10 +70,11 @@ public class DanmakuDao {
 			}
 			
 		} catch (SQLException e) {
+			LogUtil.e(e.getMessage()+": "+sql);
 			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
-			LogUtil.e(e.getMessage());
+			LogUtil.e(e.getMessage()+": "+sql);
 		} finally {
 			if(pstmt!=null) {
 				try {

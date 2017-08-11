@@ -79,7 +79,7 @@ public class DBUtil {
 				stmt.execute();
 				LogUtil.d("DB", "Execute SQL statement [" + sql + "]");
 				}catch(Exception e) {
-					e.printStackTrace();
+					LogUtil.e(e.getMessage()+":"+sql);
 				}
 			}
 

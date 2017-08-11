@@ -20,7 +20,6 @@ import me.brucezz.crawler.util.SttCode;
 import me.brucezz.crawler.util.TimeHelper;
 
 /**
- * Created by Brucezz on 2016/01/04.
  * DouyuCrawler
  */
 public class CrawlerThread implements Runnable {
@@ -46,7 +45,7 @@ public class CrawlerThread implements Runnable {
                     LogUtil.i("获取弹幕服务器地址 ...");
                     String danmakuServerStr = SttCode.deFilterStr(SttCode.deFilterStr(response));
                     danmakuServers = ResponseParser.parseDanmakuServer(danmakuServerStr);
-                    LogUtil.i("获取到 " + danmakuServers.size() + " 个服务器地址 ...");
+                    LogUtil.i("获取到 " + danmakuServers.size() + " 个服务器地址 ..."+danmakuServerStr);
                     f1 = true;
                 }
 
@@ -175,24 +174,26 @@ public class CrawlerThread implements Runnable {
                 LogUtil.w("没有可用的弹幕服务器 ...");
                 return;
             }
-            ServerInfo danmakuServer = danmakuServers.get((int) (Math.random() * danmakuServers.size()));
-            Socket socket = new Socket(danmakuServer.getHost(), danmakuServer.getPort());
-            LogUtil.i("登陆到弹幕服务器 " + danmakuServer.getHost() + ":" + danmakuServer.getPort());
-            MessageHandler.send(socket, Request.danmakuLogin(rid));
-            LogUtil.i("进入 " + rid + " 号房间， " + gid + " 号弹幕群组 ...");
-            MessageHandler.send(socket, Request.joinGroup(rid, gid));
+            LogUtil.i("弹幕服务器个数："+danmakuServers.size());
+            for(int i=0;i<danmakuServers.size();i++) {
+	            ServerInfo danmakuServer = danmakuServers.get(i);
+	            Socket socket = new Socket(danmakuServer.getHost(), danmakuServer.getPort());
+	            LogUtil.i("登陆到弹幕服务器 "+i+":" + danmakuServer.getHost() + ":" + danmakuServer.getPort());
+	            MessageHandler.send(socket, Request.danmakuLogin(rid));
+	            LogUtil.i("进入 " + rid + " 号房间， " + gid + " 号弹幕群组 ...");
+	            MessageHandler.send(socket, Request.joinGroup(rid, -9999));
+	
+	            //心跳包线程启动
+	            new Thread(new KeepLiveThread(socket), "KeepLive-" + roomName).start();
+	
+	            LogUtil.i("开始接收弹幕 ...");
+	            LogUtil.i("----------------------------------------------------------------");
+	
+	            DanmakuDao.createTable();
+	
+	            MessageHandler.receive(socket, danmakuListener);
 
-            //心跳包线程启动
-            new Thread(new KeepLiveThread(socket), "KeepLive-" + roomName).start();
-
-            LogUtil.i("开始接收弹幕 ...");
-            LogUtil.i("----------------------------------------------------------------");
-
-            DanmakuDao.createTable();
-
-            MessageHandler.receive(socket, danmakuListener);
-
-
+            }
         } catch (IOException e) {
             e.printStackTrace();
             LogUtil.d("Error", e.toString());

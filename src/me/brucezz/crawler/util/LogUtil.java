@@ -35,10 +35,10 @@ public class LogUtil {
          *
          */
 
-        return String.format("[%s][%s][%s][%s] %s",
+        return String.format("[%s][%s] %s %s %s",
                 timestamp(), level,
-                Thread.currentThread().getName(),//当期线程名
-                tag, message);
+                "",//Thread.currentThread().getName(),//当期线程名
+                "", message);
     }
 
     private static String logMessage(String level, String tag, String invokeInfo, String message) {

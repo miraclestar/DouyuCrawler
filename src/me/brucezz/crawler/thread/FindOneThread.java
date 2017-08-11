@@ -21,12 +21,13 @@ public class FindOneThread implements Runnable{
          }
 	}
 
-	String lastUserName = null;
+	String lastUserName = "firstone";
 	
 	@Override
 	public void run() {
 		
 		LogUtil.i("find one to talk");
+		Boolean getOne =false;
 		while(true) {
 			try {
 				Thread.sleep(interval);
@@ -34,25 +35,34 @@ public class FindOneThread implements Runnable{
 				e.printStackTrace();
 			}
 			// check whether user is submit one and write into file;
-			Danmaku danmaku = DanmakuDao.queryDanmaku("SELECT * FROM danmaku where snick='"+lastUserName+ "' order by _id desc limit 1");
-			lastUserName = danmaku.getSnick();
-			if(lastUserName ==null || lastUserName.isEmpty()) {
-				LogUtil.i("user say nothing");
+			Danmaku danmaku = DanmakuDao.queryDanmaku("SELECT * FROM danmaku where snick='"+lastUserName+ "' and TIMESTAMPDIFF(SECOND,`date`,NOW())<"+(interval/1000)+" order by _id desc limit 1");
+			
+			if(danmaku.getSnick() == null || danmaku.getSnick().isEmpty()) {
+				if(getOne) {
+					LogUtil.i("--用户["+lastUserName+"] 30秒内没有发续写\n");
+					lastUserName = danmaku.getSnick();
+				}
 				
 			}else {
 				try {
-					fWriter.write(danmaku.getContent());
+					fWriter.write(danmaku.getContent()+"\n");
 					fWriter.flush();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				LogUtil.i("user : " + lastUserName +", said "+ danmaku.getContent()); 
+				LogUtil.i("用户 : " + lastUserName +", 说: "+ danmaku.getContent()); 
 			}
 			//find another one to show;
-			Danmaku dan = DanmakuDao.queryDanmaku("SELECT * FROM danmaku order by _id desc limit 1");
+			Danmaku dan = DanmakuDao.queryDanmaku("SELECT * FROM danmaku where TIMESTAMPDIFF(SECOND,`date`,NOW())<"+(interval/1000)+" limit 1");
 			if(dan!=null) {
 				lastUserName  = dan.getSnick();
-				LogUtil.i("请【"+lastUserName+"】在30秒内发送一条小说续写的弹幕");				
+				if(lastUserName==null || lastUserName.equals("")) {
+					LogUtil.i("没有抽取到观众\n");
+					getOne = false;
+				}else {
+					LogUtil.i("请【"+lastUserName+"】在10秒内发言\n");
+					getOne = true;
+				}				
 			}
 		}
 		
