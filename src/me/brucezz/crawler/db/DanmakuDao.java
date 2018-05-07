@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Brucezz on 2016/01/06.
  * DouyuCrawler
  */
 public class DanmakuDao {

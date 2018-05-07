@@ -40,7 +40,7 @@ public class CrawlerThread implements Runnable {
 
             for (String response : responses) {
                 LogUtil.d("Receive Response", response);
-                if (response.contains("msgrepeaterlist")) {
+                if (response.contains("msgiplist")) {
                     //获取弹幕服务器地址
                     LogUtil.i("获取弹幕服务器地址 ...");
                     String danmakuServerStr = SttCode.deFilterStr(SttCode.deFilterStr(response));
@@ -94,7 +94,7 @@ public class CrawlerThread implements Runnable {
 
                 danmakus.add(danmaku);
 
-                //LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
+                LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
                 try {
                     fWriter.write(danmaku.getRid()+","+danmaku.getUid()+","+danmaku.getSnick() + ":" + danmaku.getContent() + "\n");
                     fWriter.flush();

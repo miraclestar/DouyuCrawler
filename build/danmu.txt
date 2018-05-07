@@ -1,0 +1,233 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class ButtonEventController : MonoBehaviour {
+	public MainController mainController;
+	public string normalName = "_normal";
+    public string pressName = "_press";
+	public int index = 0;
+    GameObject shoubing;
+    // Use this for initialization
+    void Start () {
+        shoubing = GameObject.Find("TouchPlane");
+        AppData.Instance.isChoice = false;
+        AppData.Instance.choiceObjName = "";
+		AppData.Instance.choiceObjIndex = -1;
+	}
+	
+	// Update is called once per frame
+	void Update () {
+
+	}
+
+
+    static int isTriggerred = 0;
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("----------------enter -------------" + isTriggerred + ",," + this.name);
+        //OnTriggerEnter(collision.collider);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        OnTriggerExit(collision.collider);
+    }
+
+    /// <summary>
+    /// OnTriggerEnter is called when the Collider other enters the trigger.
+    /// </summary>
+    /// <param name="other">The other Collider involved in this collision.</param>
+    void OnTriggerEnter(Collider other)
+	{
+		Debug.Log("OpenGuide OnTriggerEnter this.name = " + this.name + ",other name = " + other.name + ", tag = " + other.tag);
+        // Debug.Log("info = " + this.GetComponent<Collider>().ClosestPointOnBounds(new Vector3(0,0,0)));
+        // Vector3 pos;
+        // Vector3 pos1;
+        // RaycastHit hit;
+        // Ray ray = new Ray(other.gameObject.transform.position, -other.gameObject.transform.forward * 100);
+        // Debug.DrawRay(other.gameObject.transform.position, -other.gameObject.transform.forward, Color.red, 100);
+        // // Debug.DrawRay(Vector3.zero, Vector3.forward, Color.red, 100);
+        // if (other.Raycast (ray, out hit, 100.0f)) {
+        // 	pos = hit.point;
+        // 	Debug.Log("hit pos = " + pos + ", name = " + hit.collider.name);
+        // }
+        if (string.Equals(other.name, "LaserBeamTransform"))
+        {
+            //Debug.Log("----------------enter -------------" + isTriggerred + ",," + this.name);
+            float distance = Vector3.Distance(shoubing.transform.position, transform.position);
+            MeshFilter mf = transform.GetComponent<MeshFilter>();
+            if (mf != null)
+            {
+                string meshname = mf.sharedMesh.name;
+                //Debug.Log(shoubing.gameObject.name + ":" + shoubing.transform.position + "," + gameObject.name + ":" + transform.position + meshname + "," + distance);
+                if (meshname.StartsWith("Plane0"))
+                {
+                    distance = distance / 0.85f + 1.14f;
+                }
+            }
+            isTriggerred++;
+            other.transform.localScale = new Vector3(0.1f, 0.1f, distance );
+            //Debug.Log("distance:"+distance);
+
+        }
+        if (string.Equals(other.name, "LaserBeamTransform") && !string.Equals(this.name, "Slider")) 
+		{
+        	AppData.Instance.isChoice = true;
+        	AppData.Instance.choiceObjName = this.name;
+			if(!string.Equals(this.name, "LocalUI") && !string.Equals(this.name, "CollectionUI") 
+													&& !string.Equals(this.name, "OnlineUI")
+													&& !string.Equals(this.name, "App1")
+													&& !string.Equals(this.name, "App2")
+													&& !string.Equals(this.name, "App3")
+													&& !string.Equals(this.name, "App4")
+													&& !string.Equals(this.name, "App5"))
+			{
+				if(this.transform.GetComponent<MeshRenderer>() != null)
+        		{
+            		this.transform.GetComponent<MeshRenderer>().material.mainTexture = Resources.Load (GetButtonName() + pressName) as Texture2D;
+        		}else{
+            		this.transform.GetComponent<Image>().overrideSprite = 
+                	Resources.Load (GetButtonName() + pressName, typeof(Sprite)) as Sprite;
+        		}
+			}else{
+				// this.transform.localScale = this.transform.localScale * 2;
+				this.transform.position = this.transform.position + new Vector3(0, 0, -0.2f);
+			}
+			if(string.Equals(this.name, "PlayBtn"))
+			{
+				Debug.Log("index = " + index);
+				AppData.Instance.choiceObjIndex = index;
+			}
+			if(mainController.isPlayMode)
+			{
+				mainController.ShowControllerPlane(true);
+			}
+			if(string.Equals(this.name, "SettingBtn"))
+			{
+				mainController.UpdateSettingBtn(true);
+			}
+
+		}
+		// if(string.Equals(other.tag, "Bullet")) 
+		// {
+		// 		Debug.Log("this.name = " + this.name);
+		// 		if(string.Equals(this.name, "PlayBtn"))
+		// 		{
+		// 			if(mainController.isPlayMode)
+		// 			{
+		// 			// 	mainController.Play();
+		// 			// 	mainController.SetPlayBtnActive(false);
+		// 			// }else
+		// 			{
+		// 				Debug.Log("index = " + index);
+		// 				Messenger.Broadcast<int>(EventType.PLAY_MOVIE, index);
+		// 			}
+		// 		}
+		// }
+	}
+
+	/// <summary>
+	/// OnTriggerExit is called when the Collider other has stopped touching the trigger.
+	/// </summary>
+	/// <param name="other">The other Collider involved in this collision.</param>
+	void OnTriggerExit(Collider other)
+	{
+        if (string.Equals(other.name, "LaserBeamTransform") )
+        {
+            Debug.Log("----------------exit-------------"+isTriggerred+ ",,"+this.name);
+            isTriggerred--;
+            if (isTriggerred == 0)
+            {
+                other.transform.localScale = new Vector3(0.1f, 0.1f, 10f);
+            }
+        }
+        
+        if (string.Equals(other.name, "LaserBeamTransform") && !string.Equals(this.name, "Slider")) 
+		{
+			AppData.Instance.isChoice = false;
+        	AppData.Instance.choiceObjName = "";
+			AppData.Instance.choiceObjIndex = -1;
+			if(!string.Equals(this.name, "LocalUI") && !string.Equals(this.name, "CollectionUI") 
+													&& !string.Equals(this.name, "OnlineUI")
+													&& !string.Equals(this.name, "App1")
+													&& !string.Equals(this.name, "App2")
+													&& !string.Equals(this.name, "App3")
+													&& !string.Equals(this.name, "App4")
+													&& !string.Equals(this.name, "App5"))
+			{
+				if(this.transform.GetComponent<MeshRenderer>() != null)
+        		{
+            		this.transform.GetComponent<MeshRenderer>().material.mainTexture = Resources.Load (GetButtonName() + normalName) as Texture2D;
+        		}else{
+            		this.transform.GetComponent<Image>().overrideSprite = 
+                		Resources.Load (GetButtonName() + normalName, typeof(Sprite)) as Sprite;
+        		}
+			}else{
+				// this.transform.localScale = this.transform.localScale * 0.5f;
+				this.transform.position = this.transform.position + new Vector3(0, 0, 0.2f);
+			}
+			// if(mainController.isPlayMode)
+			// {
+			// 	mainController.ShowControllerPlane(false);
+			// }
+			if(string.Equals(this.name, "SettingBtn"))
+			{
+				mainController.UpdateSettingBtn(false);
+			}
+		}
+	}
+
+	public void ResetPos()
+	{
+		if(string.Equals(this.name, "LocalUI") || string.Equals(this.name, "CollectionUI") 
+													|| string.Equals(this.name, "OnlineUI")
+													|| string.Equals(this.name, "App1")
+													|| string.Equals(this.name, "App2")
+													|| string.Equals(this.name, "App3")
+													|| string.Equals(this.name, "App4")
+													|| string.Equals(this.name, "App5"))
+		{
+			Debug.Log("ResetPos");
+			this.transform.position = this.transform.position + new Vector3(0, 0, 0.2f);
+		}
+	}
+	public string GetButtonName()
+    {
+        if(string.Equals(this.name, "PlayBtn") && string.Equals(this.tag, "PlayBtnOutSide"))
+        {
+            return AppData.Instance.icon_path + "PlayBtnOutSide";
+        }
+
+        if (string.Equals(this.name, "ModeNormal") 
+			|| string.Equals(this.name, "Mode_180_normal") 
+            || string.Equals(this.name, "Mode180_3D") 
+            || string.Equals(this.name, "Mode180TopDown")
+            || string.Equals(this.name, "Mode360Normal")
+            || string.Equals(this.name, "Mode360_3D")
+            || string.Equals(this.name, "Mode360_TOPDOWN")
+            || string.Equals(this.name, "ModeCube")
+            || string.Equals(this.name, "BtnNo")
+            || string.Equals(this.name, "SureBtn")
+            || string.Equals(this.name, "CancelBtn")
+            || string.Equals(this.name, "BtnRecheck")
+			|| string.Equals(this.name, "Mode_3D")
+			|| string.Equals(this.name, "Mode_3D_LeftRight")
+			|| string.Equals(this.name, "Mode_3D_TopDown")
+
+			|| string.Equals(this.name, "QuitBtn")
+			|| string.Equals(this.name, "HomeBtn")
+			|| string.Equals(this.name, "PlayBtn")
+			|| string.Equals(this.name, "PauseBtn")
+			|| string.Equals(this.name, "SettingBtn")
+			|| string.Equals(this.name, "RotateBtn")
+			|| string.Equals(this.name, "SoundBtn")
+            )
+        {
+            return AppData.Instance.icon_path_new + this.name;//"BtnYes";
+        }
+        return AppData.Instance.icon_path + this.name;
+    }
+}
