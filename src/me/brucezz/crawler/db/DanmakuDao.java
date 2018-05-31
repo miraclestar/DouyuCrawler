@@ -94,7 +94,55 @@ public class DanmakuDao {
     	return ret;
     }
     
-
+    /**
+     * 
+     * @param args
+     */
+    public static List<Danmaku> queryDanmakus(String sql) {
+    	List<Danmaku> ret = new ArrayList<Danmaku>();
+    	Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			conn = DBUtil.getConnection();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				Danmaku danmaku = new Danmaku();
+				danmaku.setUid(rs.getInt("uid"));
+				danmaku.setContent(rs.getString("content"));
+				danmaku.setDate(rs.getDate("date"));
+				danmaku.setSnick(rs.getString("snick"));
+				danmaku.setRid(rs.getInt("rid"));
+				ret.add(danmaku);
+			}
+			
+		} catch (SQLException e) {
+			LogUtil.e(e.getMessage()+": "+sql);
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			LogUtil.e(e.getMessage()+": "+sql);
+		} finally {
+			if(pstmt!=null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			if(rs!=null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+    	
+    	return ret;
+    }
     public static void main(String[] args) {
         //测试
     	

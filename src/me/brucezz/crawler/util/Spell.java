@@ -39,7 +39,11 @@ public class Spell {
     * @return 拼音 
     */  
     public static String converterToSpell(String chines){          
-        String pinyinName = "";  
+    	return converterToSpell(chines,"");
+    }  
+    
+    public static String converterToSpell(String chines,String splitby){
+    	String pinyinName = "";  
         char[] nameChar = chines.toCharArray();  
         HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();  
         defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);  
@@ -47,8 +51,12 @@ public class Spell {
         for (int i = 0; i < nameChar.length; i++) {  
             if (nameChar[i] > 128) {  
                 try {  
-                    pinyinName += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0];  
-                } catch (BadHanyuPinyinOutputFormatCombination e) {  
+//                	LogUtil.i(nameChar[i]+"  ====  "+defaultFormat);
+//                	LogUtil.i(PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat).length+",length");
+//                	
+                    pinyinName += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0]+splitby;
+                    
+                } catch (Exception e) {  
                     e.printStackTrace();  
                 }  
             }else{  
@@ -56,9 +64,35 @@ public class Spell {
             }  
         }  
         return pinyinName;  
-    }  
+		
+	}
+    
+    public static String converterFirstWord(String chines,String splitby){
+    	String pinyinName = "";  
+        char[] nameChar = chines.toCharArray();  
+        HanyuPinyinOutputFormat defaultFormat = new HanyuPinyinOutputFormat();  
+        defaultFormat.setCaseType(HanyuPinyinCaseType.LOWERCASE);  
+        defaultFormat.setToneType(HanyuPinyinToneType.WITHOUT_TONE);  
+        for (int i = 0; i < nameChar.length; i++) {  
+            if (nameChar[i] > 128) {  
+                try {  
+                
+                    pinyinName += PinyinHelper.toHanyuPinyinStringArray(nameChar[i], defaultFormat)[0]+splitby;
+                    //LogUtil.d(pinyinName+" : "+ nameChar[i]);
+                    break;
+                } catch (Exception e) {  
+                    //e.printStackTrace();  
+                	LogUtil.e(e.getMessage());
+                }  
+            }else{  
+                pinyinName += nameChar[i];  
+            }  
+        }  
+        return pinyinName;  
+		
+	}
       
     public static void main(String[] args) {  
-        System.out.println(converterToSpell("欢 迎来到最棒的Java中文社区"));  
+        System.out.println(converterToSpell("1231231"," "));  
     }  
 }  

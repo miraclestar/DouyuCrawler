@@ -28,7 +28,7 @@ public class CrawlerThread implements Runnable {
     private String roomName;
     private String roomUrl;
     private int rid = -1;
-    private int gid = -1;
+    private int gid = -9999;
     //请求登陆服务器回调
     private MessageHandler.OnReceiveListener loginListener = new MessageHandler.OnReceiveListener() {
         private boolean finish = false;
@@ -94,13 +94,12 @@ public class CrawlerThread implements Runnable {
 
                 danmakus.add(danmaku);
 
-                LogUtil.i("Danmaku", danmaku.getSnick() + ":" + danmaku.getContent());
+                LogUtil.i("Danmaku", danmaku.getContent() + "  :by: " + danmaku.getSnick());
                 try {
                     fWriter.write(danmaku.getRid()+","+danmaku.getUid()+","+danmaku.getSnick() + ":" + danmaku.getContent() + "\n");
                     fWriter.flush();
                 } catch (IOException e) {
                     e.printStackTrace();
-
                 }
                 if (DanmakuDao.saveDanmaku(danmakus)) {
                     //LogUtil.i("DB", "保存弹幕到数据库 ...");
@@ -112,7 +111,6 @@ public class CrawlerThread implements Runnable {
             if (helper.checkTimeout() && !isOnline()) finished = true;
 
         }
-
         @Override
         public boolean isFinished() {
             return finished;

@@ -3,6 +3,7 @@ package me.brucezz.crawler;
 import java.util.Set;
 
 import me.brucezz.crawler.config.Config;
+import me.brucezz.crawler.thread.ChengYuThread;
 import me.brucezz.crawler.thread.CrawlerThread;
 import me.brucezz.crawler.thread.FindOneThread;
 import me.brucezz.crawler.util.LogUtil;
@@ -21,6 +22,7 @@ public class Main {
             new Thread(new CrawlerThread(name, Config.ROOM_MAP.get(name)), "Crawler-"+name).start();
         }
         
-        new Thread(new FindOneThread()).start();
+//        new Thread(new FindOneThread()).start();
+        new Thread(new ChengYuThread()).start();
     }
 }
